@@ -244,8 +244,13 @@ bool generate(char * file_in, char * file_out)
     read_line(fi, line, LINE_SIZE);
     fprintf(fo, "%s", line);
     for (int j = 1; j < COLUMNS_COUNT; j++) {
+      // Format 1
       // fprintf(fo, " %s:%s", cols[j].srt_label, data[i].values[j - 1]);
+      
+      // Format 2
       fprintf(fo, " %s%s", data[i].values[j - 1], cols[j].srt_label);
+
+      // Format 3
       // fprintf(fo, " %s:%s%s", cols[j].csv_label, data[i].values[j - 1], cols[j].srt_label);
     }
     fprintf(fo, "\r\n");
