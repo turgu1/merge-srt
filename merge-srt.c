@@ -24,12 +24,14 @@ struct cols_struct {
 struct header_struct {
   char * label;
 } header[200];
-int idx;
+int header_cnt;
 
 struct data_struct {
   int time;
   char * values[COLUMNS_COUNT - 1];
 } data[DATA_COUNT];
+
+int data_cnt;
 
 bool read_csv_header(FILE * f)
 {
@@ -39,7 +41,7 @@ bool read_csv_header(FILE * f)
   char buff[21];
   int i;
 
-  idx = 0;
+  header_cnt = 0;
 
   while ((ch != '\r') && !feof(f)) {
 
@@ -57,12 +59,12 @@ bool read_csv_header(FILE * f)
       return false;
     }
 
-    header[idx].label = (char *) malloc(strlen(buff) + 1);
-    strcpy(header[idx].label, buff);
-    idx++;
+    header[header_cnt].label = (char *) malloc(strlen(buff) + 1);
+    strcpy(header[header_cnt].label, buff);
+    header_cnt++;
   } 
 
-  // for (i = 0; i < idx; i++) {
+  // for (i = 0; i < header_cnt; i++) {
   //   fprintf(stderr, "%d: %s\n", i, header[i].label);
   // }
 
@@ -74,7 +76,7 @@ bool get_csv_cols()
   bool err = false;
 
   for (int i = 0; i < COLUMNS_COUNT; i++) {
-    for (int j = 0; j < idx; j++) {
+    for (int j = 0; j < header_cnt; j++) {
       if (strncmp(header[j].label, cols[i].csv_label, strlen(cols[i].csv_label)) == 0) {
         cols[i].col = j;
         // fprintf(stderr, "Colonne %s = %d\n", cols[i].csv_label, j);
@@ -196,6 +198,8 @@ bool read_csv(char * filename)
     i++;
   }
 
+  data_cnt = i;
+
   fclose(f);
 
   return true;
@@ -233,8 +237,10 @@ bool generate(char * file_in, char * file_out)
     int time = get_millis(line);
 
     int i = 0;
-    while ((i < idx) && (data[i].time <= time)) i++;
+    while ((i < data_cnt) && (data[i].time <= time)) i++;
     if (i > 0) i--;
+
+    // fprintf(stderr, "Pour %d trouvé ligne %d\n", time, i);
 
     // Ligne 3
     if (feof(fi)) {
@@ -248,10 +254,10 @@ bool generate(char * file_in, char * file_out)
       // fprintf(fo, " %s:%s", cols[j].srt_label, data[i].values[j - 1]);
       
       // Format 2
-      fprintf(fo, " %s%s", data[i].values[j - 1], cols[j].srt_label);
+      // fprintf(fo, " %s%s", data[i].values[j - 1], cols[j].srt_label);
 
       // Format 3
-      // fprintf(fo, " %s:%s%s", cols[j].csv_label, data[i].values[j - 1], cols[j].srt_label);
+      fprintf(fo, " %s:%s%s", cols[j].csv_label, data[i].values[j - 1], cols[j].srt_label);
     }
     fprintf(fo, "\r\n");
 
